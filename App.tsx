@@ -60,23 +60,29 @@ const formatTo12Hour = (time: string) => {
 
 // Login Screen Component
 const LoginScreen = ({ onLogin }: { onLogin: (identifier: string, type: 'email' | 'phone') => void }) => {
-  const [input, setInput] = useState('');
+  const [step, setStep] = useState<'menu' | 'email' | 'phone'>('menu');
+  const [inputValue, setInputValue] = useState('');
   const [error, setError] = useState('');
 
-  const handleLogin = () => {
-    if (!input.trim()) {
-      setError('Please enter your email or phone number');
+  const handleSubmit = () => {
+    if (!inputValue.trim()) {
+      setError('Please enter a valid input');
       return;
     }
-    const isEmail = input.includes('@');
-    const isPhone = /^[\d\s\-+]+$/.test(input);
-
-    if (!isEmail && !isPhone) {
-      setError('Please enter a valid email or phone number');
-      return;
+    
+    if (step === 'email') {
+      if (!inputValue.includes('@')) {
+        setError('Please enter a valid email address');
+        return;
+      }
+      onLogin(inputValue, 'email');
+    } else {
+      if (!/^[\d\s\-+]+$/.test(inputValue)) {
+        setError('Please enter a valid phone number');
+        return;
+      }
+      onLogin(inputValue, 'phone');
     }
-
-    onLogin(input, isEmail ? 'email' : 'phone');
   };
 
   return (
@@ -87,37 +93,62 @@ const LoginScreen = ({ onLogin }: { onLogin: (identifier: string, type: 'email' 
           <div className="absolute -bottom-1 -right-1 bg-green-400 w-6 h-6 rounded-full border-2 border-white dark:border-gray-800"></div>
         </div>
         <h1 className="text-3xl font-bold text-capy-800 dark:text-white mb-2">CapyStudy</h1>
-        <p className="text-gray-500 dark:text-gray-400 mb-8 font-medium">Login to start your cozy study session</p>
+        <p className="text-gray-500 dark:text-gray-400 mb-8 font-medium">Your cozy study companion</p>
         
-        <div className="space-y-4 text-left">
-          <div>
-            <label className="block text-sm font-bold text-gray-600 dark:text-gray-300 mb-2 ml-1">Email or Phone Number</label>
-            <div className="relative group">
-                <input 
-                  type="text" 
-                  value={input}
-                  onChange={(e) => {setInput(e.target.value); setError('');}}
-                  placeholder="name@example.com or 123-456-7890"
-                  className="w-full p-4 pl-12 border border-gray-300 rounded-xl bg-gray-50 dark:bg-gray-700 dark:border-gray-600 text-gray-800 dark:text-white outline-none focus:ring-2 focus:ring-capy-400 transition-all placeholder-gray-400"
-                  onKeyDown={(e) => e.key === 'Enter' && handleLogin()}
-                  autoFocus
-                />
-                <UserIcon className="absolute left-4 top-4 text-gray-400 group-focus-within:text-capy-500 transition-colors" size={20}/>
+        {step === 'menu' && (
+            <div className="space-y-4">
+                <button 
+                    onClick={() => setStep('email')}
+                    className="w-full py-4 bg-white border-2 border-gray-200 dark:border-gray-600 dark:bg-gray-700 text-gray-700 dark:text-white rounded-xl font-bold text-lg hover:bg-gray-50 dark:hover:bg-gray-600 transition-all flex items-center justify-center gap-3 shadow-sm group"
+                >
+                    <Mail className="text-red-500 group-hover:scale-110 transition-transform" /> Continue with Google
+                </button>
+                <button 
+                    onClick={() => setStep('phone')}
+                    className="w-full py-4 bg-capy-500 text-white rounded-xl font-bold text-lg hover:bg-capy-600 transition-all flex items-center justify-center gap-3 shadow-md group"
+                >
+                    <Smartphone className="group-hover:scale-110 transition-transform" /> Continue with Phone
+                </button>
+                
+                <div className="flex items-center justify-center gap-2 mt-6 text-sm text-gray-400">
+                     <div className="w-4 h-4 rounded border border-gray-300 bg-capy-500 flex items-center justify-center">
+                        <Check size={10} className="text-white" />
+                     </div>
+                     <span>Keep me logged in</span>
+                </div>
             </div>
-            {error && <p className="text-red-500 text-xs mt-2 ml-1 font-bold flex items-center gap-1"><span className="inline-block w-1.5 h-1.5 rounded-full bg-red-500"></span>{error}</p>}
-          </div>
-          
-          <button 
-            onClick={handleLogin}
-            className="w-full py-4 bg-capy-500 text-white rounded-xl font-bold text-lg hover:bg-capy-600 transition-all active:scale-95 shadow-md flex items-center justify-center gap-2 group"
-          >
-            Start Studying <ChevronRight size={20} className="group-hover:translate-x-1 transition-transform"/>
-          </button>
-        </div>
-        
-        <div className="mt-8 pt-6 border-t border-gray-100 dark:border-gray-700">
-           <p className="text-xs text-gray-400">By logging in, you agree to stay chill and hydrated.</p>
-        </div>
+        )}
+
+        {step !== 'menu' && (
+            <div className="space-y-4 animate-in fade-in slide-in-from-right-4">
+                 <div className="text-left">
+                    <label className="block text-sm font-bold text-gray-600 dark:text-gray-300 mb-2 ml-1">
+                        {step === 'email' ? 'Google Account Email' : 'Phone Number'}
+                    </label>
+                    <input 
+                      type="text" 
+                      value={inputValue}
+                      onChange={(e) => {setInputValue(e.target.value); setError('');}}
+                      placeholder={step === 'email' ? "name@gmail.com" : "123-456-7890"}
+                      className="w-full p-4 border border-gray-300 rounded-xl bg-gray-50 dark:bg-gray-700 dark:border-gray-600 text-gray-800 dark:text-white outline-none focus:ring-2 focus:ring-capy-400 transition-all placeholder-gray-400"
+                      onKeyDown={(e) => e.key === 'Enter' && handleSubmit()}
+                      autoFocus
+                    />
+                    {error && <p className="text-red-500 text-xs mt-2 ml-1 font-bold flex items-center gap-1"><span className="inline-block w-1.5 h-1.5 rounded-full bg-red-500"></span>{error}</p>}
+                 </div>
+                 
+                 <button 
+                    onClick={handleSubmit}
+                    className="w-full py-4 bg-capy-500 text-white rounded-xl font-bold text-lg hover:bg-capy-600 transition-all shadow-md active:scale-95"
+                 >
+                    {step === 'email' ? 'Sign In' : 'Send Code'}
+                 </button>
+                 
+                 <button onClick={() => {setStep('menu'); setError(''); setInputValue('')}} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 text-sm font-bold pt-2">
+                     Back to options
+                 </button>
+            </div>
+        )}
       </div>
     </div>
   )
@@ -1143,27 +1174,36 @@ const WellnessCenter = ({ logs, setLogs }: { logs: WellnessLog[], setLogs: (logs
         setLoadingInsights(false);
     };
 
+    // Updated mood options: Ascending order (Sad to Happy)
     const moodOptions = [
-        { value: 'energetic', emoji: '🤩', score: 5, label: 'Super Happy' },
-        { value: 'happy', emoji: '😊', score: 4, label: 'Happy' },
-        { value: 'neutral', emoji: '😐', score: 3, label: 'Neutral' },
-        { value: 'tired', emoji: '😢', score: 2, label: 'Sad' },
         { value: 'stressed', emoji: '😭', score: 1, label: 'Miserable' },
+        { value: 'tired', emoji: '😢', score: 2, label: 'Sad' },
+        { value: 'neutral', emoji: '😐', score: 3, label: 'Neutral' },
+        { value: 'happy', emoji: '😊', score: 4, label: 'Happy' },
+        { value: 'energetic', emoji: '🤩', score: 5, label: 'Super Happy' },
     ];
 
     const moodMap: Record<string, number> = {
-        energetic: 5,
-        happy: 4,
-        neutral: 3,
+        stressed: 1,
         tired: 2,
-        stressed: 1
+        neutral: 3,
+        happy: 4,
+        energetic: 5
     };
 
     const chartData = useMemo(() => {
         const today = new Date();
-        const last7Days = Array.from({length: 7}, (_, i) => {
-            const d = new Date(today);
-            d.setDate(today.getDate() - (6 - i));
+        const currentDay = today.getDay(); // 0 is Sunday, 1 is Monday...
+        // Calculate days to subtract to get to the most recent Monday
+        // If today is Sunday (0), we subtract 6 days.
+        // If today is Monday (1), we subtract 0 days.
+        const daysToSubtract = (currentDay + 6) % 7;
+        const monday = new Date(today);
+        monday.setDate(today.getDate() - daysToSubtract);
+
+        const weekDates = Array.from({length: 7}, (_, i) => {
+            const d = new Date(monday);
+            d.setDate(monday.getDate() + i);
             return d.toISOString().split('T')[0];
         });
 
@@ -1182,7 +1222,7 @@ const WellnessCenter = ({ logs, setLogs }: { logs: WellnessLog[], setLogs: (logs
             steps: Number(todayLog.steps) || 0
         });
 
-        return last7Days.map(date => {
+        return weekDates.map(date => {
             const log = logMap.get(date) || { date, waterIntake: 0, sleepHours: 0, mood: 'neutral' };
             return {
                 ...log,
@@ -1201,7 +1241,7 @@ const WellnessCenter = ({ logs, setLogs }: { logs: WellnessLog[], setLogs: (logs
                     <h3 className="font-bold text-lg mb-4 text-capy-700 dark:text-capy-200">Track Today</h3>
                     <div className="space-y-4">
                         <div>
-                            <label className="block text-sm font-bold text-gray-500 mb-1">Mood (Happy to Sad)</label>
+                            <label className="block text-sm font-bold text-gray-500 mb-1">Mood (Sad to Happy)</label>
                             <div className="flex justify-between bg-gray-50 dark:bg-gray-700 p-2 rounded-xl">
                                 {moodOptions.map((m) => (
                                     <button 
@@ -1272,11 +1312,26 @@ const WellnessCenter = ({ logs, setLogs }: { logs: WellnessLog[], setLogs: (logs
             <div className="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 h-80">
                 <h3 className="font-bold text-lg mb-4 text-gray-700 dark:text-gray-200">Weekly Trends</h3>
                 <ResponsiveContainer width="100%" height="100%">
-                    <LineChart data={chartData}>
+                    <LineChart data={chartData} margin={{ top: 10, right: 30, left: 10, bottom: 5 }}>
                         <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" vertical={false} />
-                        <XAxis dataKey="date" stroke="#9ca3af" tick={{fontSize: 12}} tickFormatter={(value) => new Date(value).toLocaleDateString(undefined, {weekday: 'short'})} />
+                        <XAxis 
+                            dataKey="date" 
+                            stroke="#9ca3af" 
+                            tick={{fontSize: 12}} 
+                            tickFormatter={(value) => {
+                                // Add time to ensure date parsing is in local time, not UTC which might shift the day back
+                                return new Date(value + 'T12:00:00').toLocaleDateString(undefined, {weekday: 'short'});
+                            }} 
+                        />
                         
-                        <YAxis yAxisId="left" stroke="#8b5cf6" tick={{fontSize: 12}} domain={[0, 6]} label={{ value: 'Mood (1-5) / Sleep (h)', angle: -90, position: 'insideLeft', style: {fontSize: 10, fill: '#8b5cf6'} }} />
+                        <YAxis 
+                            yAxisId="left" 
+                            stroke="#8b5cf6" 
+                            tick={{fontSize: 12}} 
+                            domain={[0, 6]} 
+                            width={45}
+                            label={{ value: 'Mood / Sleep', angle: -90, position: 'insideLeft', style: {fontSize: 10, fill: '#8b5cf6', textAnchor: 'middle'} }} 
+                        />
                         <YAxis yAxisId="right" orientation="right" stroke="#1e3a8a" tick={{fontSize: 12}} label={{ value: 'Water (ml)', angle: 90, position: 'insideRight', style: {fontSize: 10, fill: '#1e3a8a'} }} />
                         
                         <Tooltip 
@@ -1370,15 +1425,29 @@ const ProfileSettings = ({ user, setUser, onLogout }: { user: User, setUser: Rea
     const [editName, setEditName] = useState(user.name);
     const fileInputRef = useRef<HTMLInputElement>(null);
     const bannerInputRef = useRef<HTMLInputElement>(null);
+    const [bindInput, setBindInput] = useState('');
+    const [bindingType, setBindingType] = useState<'email' | 'phone' | null>(null);
 
     const handleSaveName = () => { setUser({ ...user, name: editName }); setIsEditing(false); };
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => { if (e.target.files && e.target.files[0]) { const reader = new FileReader(); reader.onload = (ev) => { if(ev.target?.result) setUser({...user, avatar: ev.target.result as string}); }; reader.readAsDataURL(e.target.files[0]); } };
     const handleBannerChange = (e: React.ChangeEvent<HTMLInputElement>) => { if (e.target.files && e.target.files[0]) { const reader = new FileReader(); reader.onload = (ev) => { if(ev.target?.result) setUser({...user, banner: ev.target.result as string}); }; reader.readAsDataURL(e.target.files[0]); } };
     const toggleSetting = (key: 'darkMode' | 'reminders') => { setUser({ ...user, settings: { ...user.settings, [key]: !user.settings[key] } }); };
 
+    const handleBind = () => {
+        if (!bindInput || !bindingType) return;
+        setUser({...user, [bindingType]: bindInput});
+        setBindingType(null);
+        setBindInput('');
+    };
+
+    const handleUnbind = (type: 'email' | 'phone') => {
+        // Removed validation to allow unbinding last method as requested
+        setUser({...user, [type]: ''});
+    };
+
     return (
         <div className="p-8 max-w-2xl mx-auto dark:text-white overflow-y-auto h-full pb-20">
-            <div className="bg-white dark:bg-gray-800 rounded-3xl shadow-lg overflow-hidden border border-capy-100 dark:border-gray-700">
+            <div className="bg-white dark:bg-gray-800 rounded-3xl shadow-lg overflow-hidden border border-capy-100 dark:border-gray-700 mb-6">
                 <div className="h-32 bg-capy-400 relative bg-cover bg-center" style={{ backgroundImage: user.banner ? `url(${user.banner})` : undefined }}>
                     <button onClick={() => bannerInputRef.current?.click()} className="absolute top-4 right-4 bg-black/30 p-2 rounded-full text-white hover:bg-black/50 transition-colors"><ImageIcon size={18}/></button>
                     <input type="file" ref={bannerInputRef} className="hidden" accept="image/*" onChange={handleBannerChange} />
@@ -1397,6 +1466,46 @@ const ProfileSettings = ({ user, setUser, onLogout }: { user: User, setUser: Rea
                     </div>
                     <div className="space-y-6">
                         <div className="space-y-2">
+                             <h3 className="font-bold text-gray-700 dark:text-gray-300 border-b dark:border-gray-700 pb-2 mb-4">Linked Accounts</h3>
+                             
+                             {/* Google / Email */}
+                             <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl border border-gray-100 dark:border-gray-700">
+                                <div className="flex items-center gap-4">
+                                    <div className="w-10 h-10 rounded-full bg-white dark:bg-gray-600 flex items-center justify-center shadow-sm text-red-500">
+                                        <Mail size={20} />
+                                    </div>
+                                    <div>
+                                        <div className="font-bold text-gray-800 dark:text-white">Google Account</div>
+                                        <div className="text-xs text-gray-500 dark:text-gray-400">{user.email || 'Not linked'}</div>
+                                    </div>
+                                </div>
+                                {user.email ? (
+                                    <button onClick={() => handleUnbind('email')} className="text-red-400 hover:text-red-500 text-sm font-bold px-3 py-1 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20">Unbind</button>
+                                ) : (
+                                    <button onClick={() => setBindingType('email')} className="text-capy-600 hover:text-capy-700 text-sm font-bold px-3 py-1 rounded-lg bg-capy-100 hover:bg-capy-200">Link</button>
+                                )}
+                             </div>
+
+                             {/* Phone */}
+                             <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl border border-gray-100 dark:border-gray-700">
+                                <div className="flex items-center gap-4">
+                                    <div className="w-10 h-10 rounded-full bg-white dark:bg-gray-600 flex items-center justify-center shadow-sm text-blue-500">
+                                        <Smartphone size={20} />
+                                    </div>
+                                    <div>
+                                        <div className="font-bold text-gray-800 dark:text-white">Phone Number</div>
+                                        <div className="text-xs text-gray-500 dark:text-gray-400">{user.phone || 'Not linked'}</div>
+                                    </div>
+                                </div>
+                                {user.phone ? (
+                                    <button onClick={() => handleUnbind('phone')} className="text-red-400 hover:text-red-500 text-sm font-bold px-3 py-1 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20">Unbind</button>
+                                ) : (
+                                    <button onClick={() => setBindingType('phone')} className="text-capy-600 hover:text-capy-700 text-sm font-bold px-3 py-1 rounded-lg bg-capy-100 hover:bg-capy-200">Link</button>
+                                )}
+                             </div>
+                        </div>
+
+                        <div className="space-y-2">
                              <h3 className="font-bold text-gray-700 dark:text-gray-300 border-b dark:border-gray-700 pb-2">Preferences</h3>
                              <div className="flex justify-between items-center py-3"><span className="flex items-center gap-3 text-gray-700 dark:text-gray-300"><Moon size={20}/> Dark Mode</span><button onClick={() => toggleSetting('darkMode')} className={`w-12 h-6 rounded-full p-1 transition-colors ${user.settings.darkMode ? 'bg-capy-500' : 'bg-gray-300'}`}><div className={`w-4 h-4 bg-white rounded-full shadow-md transform transition-transform ${user.settings.darkMode ? 'translate-x-6' : ''}`}></div></button></div>
                              <div className="flex justify-between items-center py-3"><span className="flex items-center gap-3 text-gray-700 dark:text-gray-300"><Bell size={20}/> Study Reminders</span><button onClick={() => toggleSetting('reminders')} className={`w-12 h-6 rounded-full p-1 transition-colors ${user.settings.reminders ? 'bg-green-500' : 'bg-gray-300'}`}><div className={`w-4 h-4 bg-white rounded-full shadow-md transform transition-transform ${user.settings.reminders ? 'translate-x-6' : ''}`}></div></button></div>
@@ -1405,6 +1514,26 @@ const ProfileSettings = ({ user, setUser, onLogout }: { user: User, setUser: Rea
                     </div>
                 </div>
             </div>
+
+            {/* Binding Modal */}
+             {bindingType && (
+                 <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+                     <div className="bg-white dark:bg-gray-800 p-6 rounded-2xl w-full max-w-sm shadow-xl">
+                         <h3 className="font-bold text-lg mb-4 text-gray-800 dark:text-white">Link {bindingType === 'email' ? 'Google Account' : 'Phone'}</h3>
+                         <input 
+                            autoFocus
+                            className="w-full p-3 border rounded-xl mb-4 bg-gray-50 text-gray-900 dark:bg-gray-700 dark:text-white dark:border-gray-600 outline-none focus:ring-2 focus:ring-capy-400"
+                            placeholder={bindingType === 'email' ? 'name@gmail.com' : '123-456-7890'}
+                            value={bindInput}
+                            onChange={(e) => setBindInput(e.target.value)}
+                         />
+                         <div className="flex gap-3">
+                             <button onClick={() => {setBindingType(null); setBindInput('')}} className="flex-1 py-2 text-gray-500 font-bold hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl">Cancel</button>
+                             <button onClick={handleBind} className="flex-1 py-2 bg-capy-500 text-white font-bold rounded-xl hover:bg-capy-600">Link Account</button>
+                         </div>
+                     </div>
+                 </div>
+             )}
         </div>
     );
 };
