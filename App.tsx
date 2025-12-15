@@ -274,7 +274,8 @@ const FocusZone = ({
         lofiRef.current.loop = true;
     }
     if (!whiteNoiseRef.current) {
-        whiteNoiseRef.current = new Audio('https://www.soundjay.com/nature/sounds/rain-01.mp3'); 
+        // Use a reliable Pixabay rain sound
+        whiteNoiseRef.current = new Audio('https://cdn.pixabay.com/download/audio/2022/02/10/audio_fc8622c83c.mp3?filename=soft-rain-ambient-111154.mp3'); 
         whiteNoiseRef.current.loop = true;
     }
   }, []);
