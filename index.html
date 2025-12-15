@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CapyStudy</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ['Quicksand', 'Nunito', 'sans-serif'],
+            },
+            colors: {
+              capy: {
+                50: '#fbf7f5',
+                100: '#f5ebe6',
+                200: '#ead6cc',
+                300: '#debdb0',
+                400: '#c69888',
+                500: '#a67c6d', // Main Capy Brown
+                600: '#8a6255',
+                700: '#735046',
+                800: '#60443c',
+                900: '#503a35',
+              },
+              nature: {
+                green: '#8EB69B',
+                light: '#D7E9D9',
+              }
+            }
+          }
+        }
+      }
+    </script>
+    <style>
+      body {
+        background-color: #f5ebe6;
+      }
+      /* Custom scrollbar for notebooks */
+      .notebook-scroll::-webkit-scrollbar {
+        width: 8px;
+      }
+      .notebook-scroll::-webkit-scrollbar-track {
+        background: #f1f1f1; 
+      }
+      .notebook-scroll::-webkit-scrollbar-thumb {
+        background: #c69888; 
+        border-radius: 4px;
+      }
+      .dark .notebook-scroll::-webkit-scrollbar-track {
+        background: #374151;
+      }
+      .dark .notebook-scroll::-webkit-scrollbar-thumb {
+        background: #6b7280;
+      }
+    </style>
+  <script type="importmap">
+{
+  "imports": {
+    "lucide-react": "https://esm.sh/lucide-react@^0.561.0",
+    "@google/genai": "https://esm.sh/@google/genai@^1.33.0",
+    "react-dom/client": "https://esm.sh/react-dom@^19.2.3/client",
+    "recharts": "https://esm.sh/recharts@^3.5.1",
+    "react": "https://esm.sh/react@^19.2.3",
+    "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
+    "react/": "https://esm.sh/react@^19.2.3/"
+  }
+}
+</script>
+</head>
+  <body>
+    <div id="root"></div>
+  </body>
+</html>
